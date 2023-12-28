@@ -8,17 +8,11 @@
 /*Todos os arquivos devem ser passados para a sua versão .h
 (Por exemplo, Splash.c irá virar Splash.h para fazer parte do arquivo main.c)*/
 
-// Definições de cores ANSI simuladas
-#define RED "\x1b[31m"
-#define DIM "\x1b[2m"
-#define RESET "\x1b[0m"
-
-// Estrutura para armazenar as coordenadas de objetos
 typedef struct {
     int x, y;
 } Coordinates;
 
-// Funções utilizadas
+void imprimir_ponte_flag, imprimir_mapa2_flag; */Não chequei se precisa, mas ai está*/
 void imprimir_mapa1(WINDOW *win);
 void imprimir_moedas(WINDOW *win, Coordinates *moedas, int num_moedas);
 void imprimir_bats(WINDOW *win, Coordinates *bats, int num_bats);
@@ -79,8 +73,106 @@ void mover_morcegos(Coordinates *bats, int num_bats) {
 }
 
 // Função para atacar um morcego
-void atacar_morcego(int y, int x, Coordinates *bats, int *num_bats) {
-    // Implementação...
+// Estrutura para armazenar as coordenadas dos morcegos
+struct Bat {
+    int y;
+    int x;
+};
+
+// Estrutura para armazenar dados do jogador
+struct Player {
+    // Outros campos do jogador
+    double life;
+};
+
+// Estrutura para armazenar dados de configuração
+struct Config {
+    double rateDificuldade;
+    struct Player player;
+};
+
+void mover_morcegos(struct Bat bats[], int num_bats, struct Map *mp, struct Config *cf) {
+    for (int i = 0; i < num_bats; i++) {
+        // Escolhe uma direção aleatória
+        const char *direcoes[] = {"esquerda", "cima", "baixo", "direita", "cima", "baixo"};
+        const char *direcao = direcoes[rand() % 6]; // Prioriza esquerda e direita
+
+        int novo_y = bats[i].y;
+        int novo_x = bats[i].x;
+
+        // Calcula as novas coordenadas baseadas na direção escolhida
+        if (strcmp(direcao, "cima") == 0) {
+            novo_y = (novo_y - 1 >= 0) ? novo_y - 1 : 0;
+        } else if (strcmp(direcao, "baixo") == 0) {
+            novo_y = (novo_y + 1 < mp->linhas) ? novo_y + 1 : mp->linhas - 1;
+        } else if (strcmp(direcao, "esquerda") == 0) {
+            novo_x = (novo_x - 1 >= 0) ? novo_x - 1 : 0;
+        } else if (strcmp(direcao, "direita") == 0) {
+            novo_x = (novo_x + 1 < mp->colunas) ? novo_x + 1 : mp->colunas - 1;
+        }
+
+        // Verifica se a nova posição é válida
+        if (mp->mapa[novo_y][novo_x] == '.') {
+            bats[i].y = novo_y;
+            bats[i].x = novo_x;
+        }
+
+        // Ataca morcegos na nova posição
+        atacar_morcegos(bats[i].y, bats[i].x, bats, &num_bats, cf);
+    }
+}
+
+int main() {
+    // Inicializa o gerador de números aleatórios
+    srand(time(NULL));
+
+    // Exemplo de uso das estruturas
+    struct Bat bats[] = {{2, 3}, {4, 13}, {8, 2}};
+    int num_bats = 3;
+
+    struct Map mapa = {
+        // Substitua esta matriz de exemplo pela representação real do seu mapa
+        .mapa = (char*[]){"#########",
+                           "#.......#",
+                           "#.......#",
+                           "#.......#",
+                           "#########"},
+        .linhas = 5,
+        .colunas = 9
+    };
+
+    struct Config config = {0.0, {10.0}}; // Exemplo de configuração com taxa de dificuldade zero e vida inicial 10.0
+
+    // Chama a função para mover os morcegos
+    mover_morcegos(bats, num_bats, &mapa, &config);
+
+    printf("Novas coordenadas dos morcegos: ");
+    for (int i = 0; i < num_bats; i++) {
+        printf("(%d, %d) ", bats[i].y, bats[i].x);
+    }
+    printf("\n");
+
+    printf("Vida do jogador: %.2f\n", config.player.life);
+
+    return 0;
+    
+}
+
+int main() {
+    struct Bat bats[] = {{1, 2}, {3, 4}, {5, 6}};
+    int num_bats = 3;
+
+    struct Config config = {0.0, {10.0}}; // Exemplo de configuração com taxa de dificuldade zero e vida inicial 10.0
+    
+    struct Bat* new_bats = atacar_morcego(3, 4, bats, &num_bats, &config);
+
+    printf("Novas coordenadas x e y do morcego");
+    for (int i = 0; i < num_bats; i++) {
+        printf("(%d, %d) ", new_bats[i].y, new_bats[i].x);
+    }
+    printf("\nVida do jogador: %.2f\n", config.player.life);
+
+    return 0;
 }
 
 void nevoa1(WINDOW *win) {
@@ -98,19 +190,19 @@ void nevoa2(WINDOW *win) {
 }
 
 int main() {
-    initscr(); // Inicializa o modo ncurses
-    noecho();  // Não exibe as teclas pressionadas
-    curs_set(FALSE); // Não mostra o cursor
+    initscr();
+    noecho();
+    curs_set(FALSE);
 
-    WINDOW *win = newwin(25, 40, 0, 0); // Cria uma nova janela
-    box(win, 0, 0); // Adiciona uma borda à janela
-    refresh(); // Atualiza a tela padrão
+    WINDOW *win = newwin(25, 40, 0, 0);
+    box(win, 0, 0);
+    refresh()
 
     nevoa1(win);
-    getch(); // Aguarda uma tecla ser pressionada
+    getch()
 
     nevoa2(win);
-    getch(); // Aguarda outra tecla ser pressionada
+    getch()
 
-    endwin(); // Encerra o modo ncurses
+    endwin();
     return 0;
