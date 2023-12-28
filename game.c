@@ -3,6 +3,7 @@
 #include <curses.h>
 #include <string.h>
 #include <time.h>
+#include <ncurses.h>
 
 /*Todos os arquivos devem ser passados para a sua versão .h
 (Por exemplo, Splash.c irá virar Splash.h para fazer parte do arquivo main.c)*/
@@ -63,6 +64,12 @@ void imprimir_bats(WINDOW *win, Coordinates *bats, int num_bats) {
 
 // Função chamada em caso de derrota
 void youDied(int ouro) {
+    die = [
+        " #     #  #######  #     #           ######      #     #######  ######",
+        " #     #  #     #  #     #           #     #     #     #        #     #",
+        " #######  #     #  #     #           #     #     #     ####     #     #",
+        "       #  #     #  #     #           #     #     #     #        #     #",
+        " #######  #######  #######           ######      #     #######  ######"]
     // Implementação...
 }
 
@@ -75,3 +82,35 @@ void mover_morcegos(Coordinates *bats, int num_bats) {
 void atacar_morcego(int y, int x, Coordinates *bats, int *num_bats) {
     // Implementação...
 }
+
+void nevoa1(WINDOW *win) {
+    mvwprintw(win, 2, 3, "MMMMM");
+    mvwprintw(win, 4, 13, "MMMM");
+    mvwprintw(win, 8, 2, "MMMMMM");
+    wrefresh(win);
+}
+
+void nevoa2(WINDOW *win) {
+    mvwprintw(win, 20, 3, "MMMMM");
+    mvwprintw(win, 16, 7, "MMMM");
+    mvwprintw(win, 20, 14, "MMMMMM");
+    wrefresh(win);
+}
+
+int main() {
+    initscr(); // Inicializa o modo ncurses
+    noecho();  // Não exibe as teclas pressionadas
+    curs_set(FALSE); // Não mostra o cursor
+
+    WINDOW *win = newwin(25, 40, 0, 0); // Cria uma nova janela
+    box(win, 0, 0); // Adiciona uma borda à janela
+    refresh(); // Atualiza a tela padrão
+
+    nevoa1(win);
+    getch(); // Aguarda uma tecla ser pressionada
+
+    nevoa2(win);
+    getch(); // Aguarda outra tecla ser pressionada
+
+    endwin(); // Encerra o modo ncurses
+    return 0;
