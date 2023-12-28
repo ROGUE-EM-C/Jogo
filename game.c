@@ -9,10 +9,10 @@
 (Por exemplo, Splash.c irá virar Splash.h para fazer parte do arquivo main.c)*/
 
 typedef struct {
-    int x, y;
+    int y, x; // Em NCurses, o uso das coordenadas é diferente e dado por (y,x) ao invés de (x,y). //
 } Coordinates;
 
-void imprimir_ponte_flag, imprimir_mapa2_flag; */Não chequei se precisa, mas ai está*/
+void imprimir_ponte_flag, imprimir_mapa2_flag; // Não chequei se precisa, mas aí está //
 void imprimir_mapa1(WINDOW *win);
 void imprimir_moedas(WINDOW *win, Coordinates *moedas, int num_moedas);
 void imprimir_bats(WINDOW *win, Coordinates *bats, int num_bats);
@@ -26,34 +26,276 @@ int main() {
     curs_set(0);
     keypad(stdscr, TRUE);
     start_color();
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(3, COLOR_BLUE, COLOR_BLACK);
 
-    Coordinates moedas[100];  // Ajuste o tamanho conforme necessário
-    Coordinates bats[100];    // Ajuste o tamanho conforme necessário
+    Coordinates moedas[100]; // Ajustar isso aqui // 
+    Coordinates bats[100]; // Ajustar isso também //
     int num_moedas = 0;
     int num_bats = 0;
-
-    // Restante do código...
 
     endwin();
     return 0;
 }
 
-// Função para imprimir o mapa1
-void imprimir_mapa1(WINDOW *win) {
-    // Implementação...
+int posicao_valida(char mapa1[], int y, int x) {
+    return mapa1[y * 31 + x] == '.'; // Retorna 1 se a posição for válida (ponto), 0 se não for
 }
 
-// Função para imprimir as moedas
-void imprimir_moedas(WINDOW *win, Coordinates *moedas, int num_moedas) {
-    // Implementação...
+struct Map {
+    char* mapa1;
+};
+
+void desenhar_mapa1(WINDOW *win, struct Map *mp) {
+    char *mapa1 = mp->mapa1;
+
+    // Imprime o mapa1 na janela fornecida
+    for (int i = 0; i < 10; i++) { // Pode-se ajustar o tamanho do mapa //
+        for (int j = 0; j < 30; j++) { // Mesma coisa aqui //
+            if (mapa1[i * 31 + j] == '#') {
+                mvwaddch(win, i, j, '#');  // Parede
+            } else {
+                mvwaddch(win, i, j, mapa1[i * 31 + j]); // Aqui também, naturalmente //
+            }
+        }
+    }
+
+    wrefresh(win);
 }
 
-// Função para imprimir os morcegos
-void imprimir_bats(WINDOW *win, Coordinates *bats, int num_bats) {
-    // Implementação...
+int main() {
+    initscr();
+
+    WINDOW *win = newwin(10, 30, 0, 0);
+
+    struct Map mapa = {
+        .mapa1 = "#########################\n"
+                "#.........#.............#\n"
+                "#.#######.#.#######.###.#\n"
+                "#.#.......#.......#.#...#\n"
+                "#.#######.#.#######.#.#.#\n"
+                "#.#.......#.......#...#.#\n"
+                "#.#######.#.###########.#\n"
+                "#...........#...........#\n"
+                "#########################\n"
+    };
+
+    desenhar_mapa1(win, &mapa);
+
+    getch();
+
+    endwin();
+
+    return 0;
+}
+
+void imprimir_mapa1(WINDOW *win, int personagem_y, int personagem_x) {
+    char *mapa1 =
+        "#########################\n"
+        "#.........#.............#\n"
+        "#.#######.#.#######.###.#\n"
+        "#.#.......#.......#.#...#\n"
+        "#.#######.#.#######.#.#.#\n"
+        "#.#.......#.......#...#.#\n"
+        "#.#######.#.###########.#\n"
+        "#...........#...........#\n"
+        "#########################\n";
+
+    for (int i = 0; i < 10; i++) { // Pode alterar aqui, se precisar //
+        for (int j = 0; j < 30; j++) { // Aqui também //
+            if (i == personagem_y && j == personagem_x) {
+                mvwaddch(win, i, j, 'P'); // Personagem
+            } else if (posicao_valida(mapa1, i, j)) {
+                mvwaddch(win, i, j, '.'); // Ponto
+            } else {
+                mvwaddch(win, i, j, '#');
+            }
+        }
+    }
+
+    wrefresh(win);
+}
+
+int main() {
+    initscr();
+
+    WINDOW *win = newwin(12, 30, 0, 0); // EXEMPLO DE COORDENADAS //
+
+    imprimir_mapa1(win, 3, 3); // EXEMPLO DE COORDENADAS //
+
+    getch();
+
+    endwin();
+
+    return 0;
+}
+
+struct Map {
+    char* mapa1;
+};
+
+// Estrutura para armazenar configurações do jogador
+struct PlayerConfig {
+    int player[6];
+    int rateMoeda;
+    int rateDificuldade;
+};
+
+// Função para adicionar moeda aleatória
+int* adicionar_moeda_aleatoria(char mapa1[]) {
+    int* posicao_moeda = malloc(sizeof(int) * 2);
+    int pos_valida = 0;
+
+    while (!pos_valida) {
+        posicao_moeda[0] = rand() % 10;  // Linha aleatória
+        posicao_moeda[1] = rand() % 30;  // Coluna aleatória
+
+        // Verifica se a posição é válida (não é uma parede)
+        pos_valida = (mapa1[posicao_moeda[0] * 31 + posicao_moeda[1]] == '.');
+    }
+
+    return posicao_moeda;
+}
+
+void imprimir_moedas(WINDOW *win, int moedas[][2], int num_moedas) {
+    for (int i = 0; i < num_moedas; i++) {
+        mvwaddch(win, moedas[i][0], moedas[i][1], 'C');  // Caractere para representar moeda
+    }
+
+    wrefresh(win);  // Atualiza a tela
+}
+
+int main() {
+    // Inicializa o modo curses
+    initscr();
+    
+    WINDOW *win = newwin(10, 30, 0, 0); // Podemos alterar aqui //
+
+    struct Map mapa = {
+        .mapa1 = "#########################\n"
+                "#.........#.............#\n"
+                "#.#######.#.#######.###.#\n"
+                "#.#.......#.......#.#...#\n"
+                "#.#######.#.#######.#.#.#\n"
+                "#.#.......#.......#...#.#\n"
+                "#.#######.#.###########.#\n"
+                "#...........#...........#\n"
+                "#########################\n"
+    };
+
+    struct PlayerConfig cf = {
+        // Substitua esses valores por configurações reais
+        .player = {0, 0, 0, 0, 0, 0},
+        .rateMoeda = 3,
+        .rateDificuldade = 1
+    };
+
+    int moedas[10][2];  // Supondo que haja, no máximo, 10 moedas simultaneamente
+    int num_moedas = 0;
+
+    srand(time(NULL));
+
+    if (cf.player[3] % cf.rateMoeda == 0 && cf.player[3] != 0) {
+        int* posicao_moeda = adicionar_moeda_aleatoria(mapa.mapa1);
+        if (posicao_moeda) {
+            moedas[num_moedas][0] = posicao_moeda[0];
+            moedas[num_moedas][1] = posicao_moeda[1];
+            num_moedas++;
+            free(posicao_moeda);
+        }
+    }
+
+    imprimir_moedas(win, moedas, num_moedas);
+
+    getch();
+
+    endwin();
+
+    return 0;
+}
+
+struct Map {
+    char* mapa1;
+};
+
+// Estrutura para armazenar configurações do jogador
+struct PlayerConfig {
+    int player[6];
+    int rateMoeda;
+    int rateDificuldade;
+};
+
+// Função para adicionar morcego aleatório
+int* adicionar_morcego_aleatorio(char mapa1[]) {
+    int* posicao_morcego = malloc(sizeof(int) * 2);
+    int pos_valida = 0;
+
+    while (!pos_valida) {
+        posicao_morcego[0] = rand() % 10;  // Linha aleatória
+        posicao_morcego[1] = rand() % 30;  // Coluna aleatória
+
+        // Verifica se a posição é válida (não é uma parede ou outra entidade)
+        pos_valida = (mapa1[posicao_morcego[0] * 31 + posicao_morcego[1]] == '.');
+    }
+
+    return posicao_morcego;
+}
+
+// Função para imprimir morcegos
+void imprimir_morcegos(WINDOW *win, int morcegos[][2], int num_morcegos) {
+    for (int i = 0; i < num_morcegos; i++) {
+        mvwaddch(win, morcegos[i][0], morcegos[i][1], 'B');  // Caractere para representar morcego
+    }
+
+    wrefresh(win); 
+}
+
+int main() {
+   
+    initscr();
+
+    WINDOW *win = newwin(10, 30, 0, 0);
+
+    struct Map mapa = {
+        // Substitua esta string de exemplo pela representação real do seu mapa1
+        .mapa1 = "#########################\n"
+                "#.........#.............#\n"
+                "#.#######.#.#######.###.#\n"
+                "#.#.......#.......#.#...#\n"
+                "#.#######.#.#######.#.#.#\n"
+                "#.#.......#.......#...#.#\n"
+                "#.#######.#.###########.#\n"
+                "#...........#...........#\n"
+                "#########################\n"
+    };
+
+    struct PlayerConfig cf = {
+        // Podemos mudar todos os valores que estão aqui abaixo.
+        .player = {0, 0, 0, 0, 0, 0},
+        .rateMoeda = 3,
+        .rateDificuldade = 1
+    };
+
+    int morcegos[10][2];  // Supondo que haja, no máximo, 10 morcegos simultaneamente
+    int num_morcegos = 0;
+
+    srand(time(NULL));
+
+    if (cf.player[3] % 5 == 0 && cf.player[3] != 0) {
+        int* posicao_morcego = adicionar_morcego_aleatorio(mapa.mapa1);
+        if (posicao_morcego) {
+            morcegos[num_morcegos][0] = posicao_morcego[0];
+            morcegos[num_morcegos][1] = posicao_morcego[1];
+            num_morcegos++;
+            free(posicao_morcego);
+        }
+    }
+
+    imprimir_morcegos(win, morcegos, num_morcegos);
+
+    getch();
+
+    endwin();
+
+    return 0;
 }
 
 // Função chamada em caso de derrota
@@ -140,6 +382,47 @@ int main() {
         .linhas = 5,
         .colunas = 9
     };
+
+    void imprimir_mapa2(struct Map *mp, int* moedas, int* bats) {
+    char* mapa2 = mp->mapa2;
+    printf("Não tem sáida. Você morre aqui. \n");
+
+    int i, j;
+    for (i = 0; mapa2[i] != '\0'; i++) {
+        for (j = 0; mapa2[i] != '\n'; j++) {
+            char ch = mapa2[i];
+            printf("%c", ch);
+        }
+        printf("\n");
+    }
+
+    imprimir_moedas(moedas);
+    imprimir_bats(bats);
+}
+
+int main() {
+    // Exemplo de uso da estrutura Map e chamada da função imprimir_mapa2
+    struct Map mapa = {
+        // Substitua esta string de exemplo pela representação real do seu mapa2
+        .mapa2 = ("###############.#########\n"
+                  "#.........#.............#\n"
+                  "#.#####.####.######.###.#\n"
+                  "#.#...............###...#\n"
+                  "#.#######.#.#######.#.#.#\n"
+                  "#.#.......#.......#...#.#\n"
+                  "#.#######.#.##.########.#\n"
+                  "#...........#...........#\n"
+                  "#########################\n";
+    };
+
+    int moedas[] = {};
+    int bats[] = {};
+
+    // Chama a função para imprimir o mapa2
+    imprimir_mapa2(&mapa, moedas, bats);
+
+    return 0;
+}
 
     struct Config config = {0.0, {10.0}}; // Exemplo de configuração com taxa de dificuldade zero e vida inicial 10.0
 
