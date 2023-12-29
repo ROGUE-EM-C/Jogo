@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <curses.h>
 
 // Como nossos sistemas operacionais são Windows, usaremos o PDCurses. //
