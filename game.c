@@ -2,16 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <PDCurses.h> // Como nossos sistemas operacionais são Windows, usaremos o PDCurses. //
+#include <curses.h>
+
+// Como nossos sistemas operacionais são Windows, usaremos o PDCurses. //
 
 /*Todos os arquivos devem ser passados para a sua versão .h
 (Por exemplo, Splash.c irá virar Splash.h para fazer parte do arquivo main.c)*/
 
+int main() {
+
 typedef struct {
-    int y, x; // Em NCurses, o uso das coordenadas é diferente e dado por (y,x) ao invés de (x,y). //
+    int y, x; // Em NCurses/PDCures, o uso das coordenadas é diferente e dado por (y,x) ao invés de (x,y). //
 } Coordinates;
 
-void imprimir_ponte_flag, imprimir_mapa2_flag; // Não chequei se precisa, mas aí está //
+void imprimir_ponte_flag;
 void imprimir_mapa1(WINDOW *win);
 void imprimir_mapa2(WINDOW *win);
 void imprimir_mapa3(WINDOW *win);
@@ -21,21 +25,19 @@ void youDied(int ouro);
 void mover_morcegos(Coordinates *bats, int num_bats);
 void atacar_morcego(int y, int x, Coordinates *bats, int *num_bats);
 
-int main() {
-    initscr();
+initscr();
     noecho();
     curs_set(0);
     keypad(stdscr, TRUE);
     start_color();
 
-    Coordinates moedas[100]; // Ajustar isso aqui // 
+    Coordinates moedas[100]; // Ajustar isso aqui //
     Coordinates bats[100]; // Ajustar isso também //
     int num_moedas = 0;
     int num_bats = 0;
 
     endwin();
     return 0;
-}
 
 int posicao_valida(char mapa1[], int y, int x) {
     return mapa1[y * 31 + x] == '.'; // Retorna 1 se a posição for válida (ponto), 0 se não for
@@ -45,7 +47,7 @@ struct Map {
     char* mapa1;
 };
 
-void desenhar_mapa1(WINDOW *win, struct Map *mp) {
+void desenhar_mapa1(WINDOW*win, struct Map*mp) {
     char *mapa1 = mp->mapa1;
 
     // Imprime o mapa1 na janela fornecida
@@ -60,32 +62,6 @@ void desenhar_mapa1(WINDOW *win, struct Map *mp) {
     }
 
     wrefresh(win);
-}
-
-int main() {
-    initscr();
-
-    WINDOW *win = newwin(10, 30, 0, 0);
-
-    struct Map mapa = {
-        .mapa1 = "#########################\n"
-                "#.........#.............#\n"
-                "#.#######.#.#######.###.#\n"
-                "#.#.......#.......#.#...#\n"
-                "#.#######.#.#######.#.#.#\n"
-                "#.#.......#.......#...#.#\n"
-                "#.#######.#.###########.#\n"
-                "#...........#...........#\n"
-                "#########################\n"
-    };
-
-    desenhar_mapa1(win, &mapa);
-
-    getch();
-
-    endwin();
-
-    return 0;
 }
 
 void imprimir_mapa1(WINDOW *win, int personagem_y, int personagem_x) {
@@ -115,10 +91,9 @@ void imprimir_mapa1(WINDOW *win, int personagem_y, int personagem_x) {
     wrefresh(win);
 }
 
-int main() {
-    initscr();
+initscr();
 
-    WINDOW *win = newwin(12, 30, 0, 0); // EXEMPLO DE COORDENADAS //
+    WINDOW*win = newwin(12, 30, 0, 0); // EXEMPLO DE COORDENADAS //
 
     imprimir_mapa1(win, 3, 3); // EXEMPLO DE COORDENADAS //
 
@@ -127,7 +102,6 @@ int main() {
     endwin();
 
     return 0;
-}
 
 struct Map {
     char* mapa1;
@@ -156,7 +130,7 @@ int* adicionar_moeda_aleatoria(char mapa1[]) {
     return posicao_moeda;
 }
 
-void imprimir_moedas(WINDOW *win, int moedas[][2], int num_moedas) {
+void imprimir_moedas(WINDOW*win, int moedas[][2], int num_moedas) {
     for (int i = 0; i < num_moedas; i++) {
         mvwaddch(win, moedas[i][0], moedas[i][1], 'C');  // Caractere para representar moeda
     }
@@ -164,11 +138,51 @@ void imprimir_moedas(WINDOW *win, int moedas[][2], int num_moedas) {
     wrefresh(win);  // Atualiza a tela
 }
 
-int main() {
-    // Inicializa o modo curses
-    initscr();
-    
-    WINDOW *win = newwin(10, 30, 0, 0); // Podemos alterar aqui //
+initscr();
+
+
+ int fase = 1;  // Inicializa a fase como 1
+
+    // Loop do jogo (até a fase 3)
+    while (fase <= 3) {
+        // Imprime o mapa da fase atual
+        imprimir_mapa(fase);
+
+        // Aguarda algum input ou evento para passar para a próxima fase
+        printf("Você escapou, mas por pouco tempo!");
+        getchar();
+
+        fase++;
+
+        // Limpa a tela (simulando a transição de fase)
+        system("clear");  // Use "cls" em sistemas Windows
+    }
+
+    printf("Parabéns, você zerou o jogo!\n");
+
+    return 0;
+}
+
+void imprimir_mapa(int fase) {
+    switch (fase) {
+        case 1:
+            printf("Mapa da Fase 1\n");
+            // Aqui você pode imprimir o mapa da fase 1
+            break;
+        case 2:
+            printf("Mapa da Fase 2\n");
+            // Aqui você pode imprimir o mapa da fase 2
+            break;
+        case 3:
+            printf("Mapa da Fase 3\n");
+            // Aqui você pode imprimir o mapa da fase 3
+            break;
+        default:
+            break;
+    }
+}
+
+    WINDOW*win = newwin(10, 30, 0, 0); // Podemos alterar aqui //
 
     struct Map mapa = {
         .mapa1 = "#########################\n"
@@ -210,7 +224,6 @@ int main() {
     endwin();
 
     return 0;
-}
 
 struct Map {
     char* mapa1;
@@ -245,12 +258,10 @@ void imprimir_morcegos(WINDOW *win, int morcegos[][2], int num_morcegos) {
         mvwaddch(win, morcegos[i][0], morcegos[i][1], 'B');  // Caractere para representar morcego
     }
 
-    wrefresh(win); 
+    wrefresh(win);
 }
 
-int main() {
-   
-    initscr();
+initscr();
 
     WINDOW *win = newwin(10, 30, 0, 0);
 
@@ -295,7 +306,6 @@ int main() {
     endwin();
 
     return 0;
-}
 
 // Função chamada em caso de derrota
 void youDied(int ouro) {
@@ -334,9 +344,8 @@ struct Config {
 
 void mover_morcegos(struct Bat bats[], int num_bats, struct Map *mp, struct Config *cf) {
     for (int i = 0; i < num_bats; i++) {
-        // Escolhe uma direção aleatória
         const char *direcoes[] = {"esquerda", "cima", "baixo", "direita", "cima", "baixo"};
-        const char *direcao = direcoes[rand() % 6]; // Prioriza esquerda e direita
+        const char *direcao = direcoes[rand() % 6];
 
         int novo_y = bats[i].y;
         int novo_x = bats[i].x;
@@ -363,8 +372,7 @@ void mover_morcegos(struct Bat bats[], int num_bats, struct Map *mp, struct Conf
     }
 }
 
-int main() {
-    srand(time(NULL));
+srand(time(NULL));
 
     struct Bat bats[] = {{2, 3}, {4, 13}, {8, 2}};
     int num_bats = 3;
@@ -374,7 +382,7 @@ int main() {
                            "#.......#",
                            "#.......#",
                            "#.......#",
-                           "#########"},
+                           "#########"},x
         .linhas = 5,
         .colunas = 9
     };
@@ -396,7 +404,6 @@ int main() {
     imprimir_bats(bats);
 }
 
-int main() {
     struct Map mapa = {
         .mapa2 = ("###############.#########\n"
                   "#.........#.............#\n"
@@ -412,46 +419,6 @@ int main() {
     int moedas[] = {};
     int bats[] = {};
 
-    // Chama a função para imprimir o mapa2
-    imprimir_mapa2(&mapa, moedas, bats);
-
-    return 0;
-}
-
-    struct Config config = {0.0, {10.0}}; // Exemplo de configuração com taxa de dificuldade zero e vida inicial 10.0
-
-    // Chama a função para mover os morcegos
-    mover_morcegos(bats, num_bats, &mapa, &config);
-
-    printf("Novas coordenadas dos morcegos: ");
-    for (int i = 0; i < num_bats; i++) {
-        printf("(%d, %d) ", bats[i].y, bats[i].x);
-    }
-    printf("\n");
-
-    printf("Vida do jogador: %.2f\n", config.player.life);
-
-    return 0;
-    
-}
-
-int main() {
-    struct Bat bats[] = {{1, 2}, {3, 4}, {5, 6}};
-    int num_bats = 3;
-
-    struct Config config = {0.0, {10.0}}; // Exemplo de configuração com taxa de dificuldade zero e vida inicial 10.0
-    
-    struct Bat* new_bats = atacar_morcego(3, 4, bats, &num_bats, &config);
-
-    printf("Novas coordenadas x e y do morcego");
-    for (int i = 0; i < num_bats; i++) {
-        printf("(%d, %d) ", new_bats[i].y, new_bats[i].x);
-    }
-    printf("\nVida do jogador: %.2f\n", config.player.life);
-
-    return 0;
-}
-
 void nevoa1(WINDOW *win) {
     mvwprintw(win, 2, 3, "MMMMM");
     mvwprintw(win, 4, 13, "MMMM");
@@ -466,20 +433,4 @@ void nevoa2(WINDOW *win) {
     wrefresh(win);
 }
 
-int main() {
-    initscr();
-    noecho();
-    curs_set(FALSE);
-
-    WINDOW *win = newwin(25, 40, 0, 0);
-    box(win, 0, 0);
-    refresh()
-
-    nevoa1(win);
-    getch()
-
-    nevoa2(win);
-    getch()
-
-    endwin();
-    return 0;
+return 0;
