@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <curses.h>
 #include <string.h>
 #include <time.h>
-#include <ncurses.h>
+#include <PDCurses.h> // Como nossos sistemas operacionais são Windows, usaremos o PDCurses. //
 
 /*Todos os arquivos devem ser passados para a sua versão .h
 (Por exemplo, Splash.c irá virar Splash.h para fazer parte do arquivo main.c)*/
@@ -14,6 +13,8 @@ typedef struct {
 
 void imprimir_ponte_flag, imprimir_mapa2_flag; // Não chequei se precisa, mas aí está //
 void imprimir_mapa1(WINDOW *win);
+void imprimir_mapa2(WINDOW *win);
+void imprimir_mapa3(WINDOW *win);
 void imprimir_moedas(WINDOW *win, Coordinates *moedas, int num_moedas);
 void imprimir_bats(WINDOW *win, Coordinates *bats, int num_bats);
 void youDied(int ouro);
@@ -182,7 +183,6 @@ int main() {
     };
 
     struct PlayerConfig cf = {
-        // Substitua esses valores por configurações reais
         .player = {0, 0, 0, 0, 0, 0},
         .rateMoeda = 3,
         .rateDificuldade = 1
@@ -255,7 +255,6 @@ int main() {
     WINDOW *win = newwin(10, 30, 0, 0);
 
     struct Map mapa = {
-        // Substitua esta string de exemplo pela representação real do seu mapa1
         .mapa1 = "#########################\n"
                 "#.........#.............#\n"
                 "#.#######.#.#######.###.#\n"
@@ -365,15 +364,12 @@ void mover_morcegos(struct Bat bats[], int num_bats, struct Map *mp, struct Conf
 }
 
 int main() {
-    // Inicializa o gerador de números aleatórios
     srand(time(NULL));
 
-    // Exemplo de uso das estruturas
     struct Bat bats[] = {{2, 3}, {4, 13}, {8, 2}};
     int num_bats = 3;
 
     struct Map mapa = {
-        // Substitua esta matriz de exemplo pela representação real do seu mapa
         .mapa = (char*[]){"#########",
                            "#.......#",
                            "#.......#",
@@ -401,9 +397,7 @@ int main() {
 }
 
 int main() {
-    // Exemplo de uso da estrutura Map e chamada da função imprimir_mapa2
     struct Map mapa = {
-        // Substitua esta string de exemplo pela representação real do seu mapa2
         .mapa2 = ("###############.#########\n"
                   "#.........#.............#\n"
                   "#.#####.####.######.###.#\n"
